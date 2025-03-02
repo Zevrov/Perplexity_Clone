@@ -21,6 +21,13 @@ interface Coordinates {
   longitude: number;
 }
 
+interface StockQuote {
+  symbol: string;
+  price: string;
+  change: string;
+  changePercent: string;
+}
+
 const RANDOM_SEARCHES = [
   "What would happen if the moon disappeared?",
   "Why do cats purr?",
@@ -39,6 +46,18 @@ const RANDOM_SEARCHES = [
   "How do fireflies glow?",
 ];
 
+// Add this CSS at the top of your file, after the imports
+const scrollingAnimation = `
+@keyframes scroll {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+`;
+
 export default function Home() {
   const [state, setState] = useState<SearchState>({
     isLoading: false,
@@ -51,6 +70,8 @@ export default function Home() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
+  const [stocks, setStocks] = useState<StockQuote[]>([]);
+  const [stocksError, setStocksError] = useState<string | null>(null);
 
   useEffect(() => {
     // Get user's location
@@ -106,6 +127,30 @@ export default function Home() {
       return () => clearInterval(interval);
     }
   }, [coordinates]);
+
+  useEffect(() => {
+    const fetchStocks = async () => {
+      try {
+        const response = await fetch('/api/stocks');
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Could not fetch stock data');
+        }
+
+        setStocks(data);
+        setStocksError(null);
+      } catch (error: any) {
+        console.error('Stocks error:', error);
+        setStocksError(error.message);
+      }
+    };
+
+    fetchStocks();
+    // Refresh stock data every minute
+    const interval = setInterval(fetchStocks, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) return;
@@ -169,6 +214,50 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
+      {/* Add the style tag for the animation */}
+      <style jsx global>{scrollingAnimation}</style>
+
+      {/* Stock Ticker - Move it above the main content */}
+      <div className="bg-gray-800 border-b border-gray-700">
+        <div className="overflow-hidden whitespace-nowrap relative">
+          {stocksError ? (
+            <p className="text-red-400 text-sm text-center py-3">{stocksError}</p>
+          ) : stocks.length > 0 ? (
+            <div className="inline-flex animate-[scroll_20s_linear_infinite] items-center py-3">
+              {/* Duplicate the stocks array to create a seamless loop */}
+              {[...stocks, ...stocks].map((stock, index) => (
+                <div
+                  key={`${stock.symbol}-${index}`}
+                  className="flex items-center space-x-2 px-6"
+                >
+                  <span className="font-semibold text-gray-100">{stock.symbol}</span>
+                  <span className="text-gray-300">${stock.price}</span>
+                  <span
+                    className={`${
+                      parseFloat(stock.change) >= 0
+                        ? 'text-green-400'
+                        : 'text-red-400'
+                    }`}
+                  >
+                    {parseFloat(stock.change) >= 0 ? '↑' : '↓'}{' '}
+                    {Math.abs(parseFloat(stock.change))} ({stock.changePercent}%)
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex py-3 px-4 space-x-4 justify-center">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse bg-gray-700 h-6 w-32 rounded"
+                ></div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       <main className="flex-1 flex">
         {/* Sidebar */}
         <div className="w-64 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto">
