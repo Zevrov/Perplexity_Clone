@@ -218,11 +218,9 @@ export default function Home() {
       <style jsx global>{scrollingAnimation}</style>
 
       {/* Stock Ticker - Move it above the main content */}
-      <div className="bg-gray-800 border-b border-gray-700">
-        <div className="overflow-hidden whitespace-nowrap relative">
-          {stocksError ? (
-            <p className="text-red-400 text-sm text-center py-3">{stocksError}</p>
-          ) : stocks.length > 0 ? (
+      {!stocksError && stocks.length > 0 && (
+        <div className="bg-gray-800 border-b border-gray-700">
+          <div className="overflow-hidden whitespace-nowrap relative">
             <div className="inline-flex animate-[scroll_20s_linear_infinite] items-center py-3">
               {/* Duplicate the stocks array to create a seamless loop */}
               {[...stocks, ...stocks].map((stock, index) => (
@@ -245,18 +243,9 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="flex py-3 px-4 space-x-4 justify-center">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="animate-pulse bg-gray-700 h-6 w-32 rounded"
-                ></div>
-              ))}
-            </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       <main className="flex-1 flex">
         {/* Sidebar */}
