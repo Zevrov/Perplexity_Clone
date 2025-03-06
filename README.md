@@ -1,5 +1,19 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+
+https://github.com/Zevrov/Perplexity_Clone
+I have completed the project along with a few extra features.
+1. Search history
+2. Weather information gathered from the browser
+3. "I'm feeling lucky" random searches based on a pool of pre defined searches.
+4. A stock wrapper I built with Alpha Vantage as an API choice. I ran into a rate limiter during testing on this one, if it runs into that it won't show on the page load.
+
+In order to run this application you need to configure your env file with the following variables:  
+OPENWEATHER_API_KEY=""
+SERPAPI_KEY=""
+ANTHROPIC_API_KEY=""
+ALPHA_VANTAGE_API_KEY=""
+
 ## Getting Started
 
 First, run the development server:
